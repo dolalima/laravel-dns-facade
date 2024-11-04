@@ -2,7 +2,7 @@
     "name": "dolalima/laravel-dns-facade",
     "description": "Dns Facade for Laravel framework",
     "type": "library",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "require": {
         "php": "7.0|^8.0",
         "cloudflare/sdk": "^1.3",
