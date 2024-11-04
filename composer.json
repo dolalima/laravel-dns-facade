@@ -4,7 +4,7 @@
     "type": "library",
     "version": "0.0.0",
     "require": {
-        "php": ">=7.0 | ^8.0",
+        "php": "7.0|^8.0",
         "cloudflare/sdk": "^1.3",
         "aws/aws-sdk-php": "^3.325"
     },
@@ -34,6 +34,7 @@
         "allow-plugins": {
             "kylekatarnls/update-helper": true
         }
-    }
+    },
+    "license": "MIT"
 
 }
