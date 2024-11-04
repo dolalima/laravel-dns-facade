@@ -2,7 +2,8 @@
 ___
 [![Latest Stable Version](http://poser.pugx.org/dolalima/laravel-dns-facade/v)](https://packagist.org/packages/dolalima/laravel-dns-facade) 
 [![Total Downloads](http://poser.pugx.org/dolalima/laravel-dns-facade/downloads)](https://packagist.org/packages/dolalima/laravel-dns-facade) 
-[![Latest Unstable Version](http://poser.pugx.org/dolalima/laravel-dns-facade/v/unstable)](https://packagist.org/packages/dolalima/laravel-dns-facade) [![License](http://poser.pugx.org/dolalima/laravel-dns-facade/license)](https://packagist.org/packages/dolalima/laravel-dns-facade) 
+[![Latest Unstable Version](http://poser.pugx.org/dolalima/laravel-dns-facade/v/unstable)](https://packagist.org/packages/dolalima/laravel-dns-facade)
+[![License](http://poser.pugx.org/dolalima/laravel-dns-facade/license)](https://packagist.org/packages/dolalima/laravel-dns-facade) 
 [![PHP Version Require](http://poser.pugx.org/dolalima/laravel-dns-facade/require/php)](https://packagist.org/packages/dolalima/laravel-dns-facade)
 
 This package provides a DNS facade for the Laravel framework, allowing you to manage DNS records using different DNS providers.  
