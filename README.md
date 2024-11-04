@@ -47,3 +47,11 @@ $records = Dns::records('example.com');
 use Dolalima\Laravel\Dns\Facades\Dns;
 Dns::create('example.com', 'A', 'www');
 ```
+
+## Available DNS Drivers
+
+- [x] AWS Route 53
+- [x] Cloudflare
+- [ ] DigitalOcean (not implemented yet)
+- [ ] Google Cloud DNS (not implemented yet)
+
