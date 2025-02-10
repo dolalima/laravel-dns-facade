@@ -3,12 +3,10 @@
 namespace Dolalima\Laravel\Dns\Facades;
 
 
-use Aws\Route53\Route53Client;
 use Dolalima\Laravel\Dns\Contracts\Dns\Dns;
 use Dolalima\Laravel\Dns\Contracts\Dns\Factory as FactoryContract;
 use Dolalima\Laravel\Dns\Facades\Drivers\AwsRoute53;
 use Dolalima\Laravel\Dns\Facades\Drivers\CloudFlare;
-use Illuminate\Support\Facades\Facade;
 
 
 
@@ -107,7 +105,7 @@ class DnsManager implements FactoryContract
         if (method_exists($this, $driverMethod)) {
             return $this->{$driverMethod}($config);
         } else {
-            throw new InvalidArgumentException("Driver [{$name}] is not supported.");
+            throw new \InvalidArgumentException("Driver [{$name}] is not supported.");
         }
 
     }
