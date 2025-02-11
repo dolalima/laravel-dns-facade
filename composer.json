@@ -57,6 +57,11 @@
             "Composer\\Config::disableProcessTimeout",
             "@build",
             "@php vendor/bin/testbench serve --ansi"
+        ],
+        "ensure-cache-dir": [
+            "mkdir -p vendor/bin/testbench/bootstrap/cache",
+            "chmod -R 775 vendor/bin/testbench/bootstrap/cache"
         ]
+
     }
 }
