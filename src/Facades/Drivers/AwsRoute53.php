@@ -69,7 +69,9 @@ class AwsRoute53 implements DnsContract
 
     public function listRecords($zone = null) : array
     {
-        $zone = $this->findZoneByName($zone);
+        if(is_string($zone)) {
+            $zone = $this->getZoneByName($zone);
+        }
 
         $records = $this->route53->listResourceRecordSets([
             'HostedZoneId' => $zone->id
@@ -78,7 +80,14 @@ class AwsRoute53 implements DnsContract
         $list = [];
 
         foreach ($records['ResourceRecordSets'] as $record) {
-            $list[] = new DnsRecord($zone,$record['Name'],$record['Name'], $record['Type'], $record['TTL'], $record['ResourceRecords'][0]['Value']);
+            $list[] = new DnsRecord(
+                $zone,
+                $record['Name'],
+                $record['Name'],
+                $record['Type'],
+                @$record['ResourceRecords']?$record['ResourceRecords'][0]['Value']:null,
+                @$record['TTL']?:null
+            );
         }
 
         return $list;

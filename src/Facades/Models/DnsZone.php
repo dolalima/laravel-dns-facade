@@ -39,7 +39,7 @@ class DnsZone
      */
     public function listRecords()
     {
-        return Dns::provider($this->provider)->listRecords($this->id);
+        return Dns::provider($this->provider)->listRecords($this);
     }
 
 
