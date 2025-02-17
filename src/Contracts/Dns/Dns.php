@@ -12,28 +12,40 @@ interface Dns
      * List all zones
      * @return DnsZone[]
      */
-    public function listZones();
+    public function listZones(): array;
+
+    /**
+     * Find a zone by id
+     * @param string|int $id
+     * @return ?DnsZone
+     */
+    public function getZoneById(string|int $id): ?DnsZone;
+
+    /**
+     * Find a zone by name
+     * @param string $name
+     * @return ?DnsZone
+     */
+    public function findZoneByName(string $name): ?DnsZone;
 
     /**
      * Find a zone by name
      * @param string $name
      * @return DnsRecord[]
      */
-    public function listRecords($zone = null);
+    public function listRecords(DnsZone|string $zone = null): array;
 
     /**
      * Find a zone by name
-     * @param string $name
      * @return DnsRecord|null
      */
-    public function findRecord($zone, $name, $type = null);
+    public function findRecord(DnsZone|string $zone, string $name, string $type = null): ?DnsRecord;
 
     /**
      * Find a zone by name
-     * @param string $name
-     * @return DnsZone
+     * @return DnsRecord
      */
-    public function createRecord($zone, $name, $type, $content, $ttl, $ssl_tunnel = false);
+    public function createRecord(DnsZone $zone, string $name, string $type, string $content, int $ttl=300, bool $ssl_tunnel = false):DnsRecord;
 
     /**
      * @param $zone
@@ -47,10 +59,11 @@ interface Dns
 
     /**
      * Find a zone by name
+     * @param DnsZone|string $name
      * @param string $name
-     * @return DnsZone
+     * @return bool
      */
-    public function deleteRecord($zone, $name);
+    public function deleteRecord(DnsZone|string $zone, string $name):bool;
 
     /**
      * Find a zone by name
@@ -67,6 +80,6 @@ interface Dns
      * @param mixed $record
      * @return DnsRecord
      */
-    public function convertRecord($record): DnsRecord;
+    public function convertRecord($record,$zone): DnsRecord;
 
 }

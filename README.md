@@ -20,6 +20,7 @@ php artisan vendor:publish --tag=config
 ```
 
 ## Add the service provider to the providers array in config/app.php:
+If you are using Laravel 5.5 or later, you can skip this step, as the package will be auto-discovered.
 ```php
 'providers' => [
 // Other service providers...
@@ -34,19 +35,53 @@ After publishing the configuration file, you can configure the package by editin
 ```php
 use Dolalima\Laravel\Dns\Facades\Dns;
 $zones = Dns::zones();
+
+or
+
+Dns::provider('cloudflare')->zones();
 ```
+
+
+### Find Zone
+```php
+use Dolalima\Laravel\Dns\Facades\Dns;
+$zone = Dns::zone('example.com');
+
+```    
 
 ### List Records
 ```php
 use Dolalima\Laravel\Dns\Facades\Dns;
-$records = Dns::records('example.com');
+$zone = Dns::zone('example.com');
+$records = Dns::records($zone);
+
+or
+
+$records = $zone->records();
 ```
 
 ### Create Record
 ```php
 use Dolalima\Laravel\Dns\Facades\Dns;
-Dns::create('example.com', 'A', 'www');
+$zone = Dns::zone('example.com');
+$record = Dns::create($zone, 'A', 'www');
 ```
+
+### Delete Record
+```php
+use Dolalima\Laravel\Dns\Facades\Dns;
+$zone = Dns::zone('example.com');
+$result = Dns::delete($zone,'www');
+```
+
+
+### Abilities
+- [x] List Zones
+- [x] Find Zone
+- [x] List Records
+- [x] Create Record
+- [ ] Update Record
+- [x] Delete Record
 
 ## Available DNS Drivers
 
