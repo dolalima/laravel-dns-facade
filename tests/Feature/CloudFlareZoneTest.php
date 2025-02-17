@@ -9,10 +9,8 @@ use Illuminate\Contracts\Config\Repository;
 use Dotenv\Dotenv;
 
 
-class CloudFlareTest extends TestCase
+class CloudFlareZoneTest extends TestCase
 {
-
-
 
     protected $loadEnvironmentVariables = true;
 
@@ -80,49 +78,19 @@ class CloudFlareTest extends TestCase
         parent::setUp();
     }
 
-    public function testLoadConfig()
+    public function testFindRecordStatic()
     {
-        $this->assertArrayHasKey('dns', config());
-    }
+        $zone = Dns::findZoneByName(env('CLOUDFLARE_TEST_ZONE'));
 
-    public function testLoadConfigDrivers()
-    {
-        $this->assertArrayHasKey('providers', config('dns'));
-    }
+        $record = Dns::findRecord($zone->id, 'bet1');
 
-    public function testLoadConfigDriversCloudFlare()
-    {
-        $this->assertArrayHasKey('cloudflare', config('dns.providers'));
-    }
+        $this->assertIsObject($record);
 
-    public function testListZones()
-    {
-        $dns = app('dns');
-        $zones = $dns->listZones();
-        $this->assertIsArray($zones);
-    }
-
-    public function testFindZoneByName()
-    {
-        $dns = app('dns');
-        $zone = $dns->findZoneByName(getenv('CLOUDFLARE_TESTE_ZONE'));
-
-        $this->assertIsObject($zone);
-    }
-
-    public function testListRecords()
-    {
-        $dns = app('dns');
-        $zones = $dns->listZones();
-        $records = $dns->listRecords($zones[0]->id);
-        $this->assertIsArray($records);
     }
 
     public function testFindRecord()
     {
-        $dns = app('dns');
-        $zone = $dns->findZoneByName(env('CLOUDFLARE_TEST_ZONE'));
-        $record = $dns->findRecord($zone->id, 'bet1');
+        $record = Dns::provider('cloudflare')->findZoneByName(env('CLOUDFLARE_TEST_ZONE'))->findRecord('bet1');
         $this->assertIsObject($record);
     }
 

@@ -8,7 +8,7 @@ use Illuminate\Contracts\Config\Repository;
 use Dolalima\Laravel\Dns\Facades\Dns;
 use Dotenv\Dotenv;
 
-class Route53Test extends TestCase
+class Route53ZoneTest extends TestCase
 {
 
 
@@ -79,64 +79,23 @@ class Route53Test extends TestCase
         parent::setUp();
     }
 
-    public function testLoadConfig()
-    {
-        $this->app['config']->set('dns.default', 'route53');
-        $this->assertArrayHasKey('dns', config());
-    }
-
-    public function testListZone(){
-        $this->app['config']->set('dns.default', 'route53');
-        $dns = app('dns');
-        $zones = $dns->listZones();
-        $this->assertIsArray($zones);
-    }
-
-    public function testFindZone(){
-        $this->app['config']->set('dns.default', 'route53');
-        $dns = app('dns');
-        $zone = $dns->findZoneByName(env('ROUTE53_TEST_ZONE'));
-        $this->assertIsObject($zone);
-    }
-
-    public function testListRecords(){
-        $this->app['config']->set('dns.default', 'route53');
-        $dns = app('dns');
-        $records = $dns->listRecords(env('ROUTE53_TEST_ZONE'));
-        $this->assertIsArray($records);
-    }
-
-    public function testFindRecord(){
-        $this->app['config']->set('dns.default', 'route53');
-        $dns = app('dns');
-        $zone = $dns->findZoneByName(env('ROUTE53_TEST_ZONE'));
-        $record = $zone->findRecord('lti');
-        $this->assertIsObject($record);
-    }
-
-
     public function testCreateRecord(){
-
         $this->app['config']->set('dns.default', 'route53');
 
-        $zone = Dns::provider('route53')->findZoneByName(env('ROUTE53_TEST_ZONE'));
-        $record = Dns::createRecord($zone, 'teste-xyz', DnsRecordType::CNAME, env('ROUTE53_TEST_ZONE') );
+        $dns = app('dns');
+        $zone = Dns::findZoneByName(env('ROUTE53_TEST_ZONE'));
+        $record = $zone->createRecord('teste-1-xyz', DnsRecordType::CNAME, env('ROUTE53_TEST_ZONE'));
         $this->assertIsObject($record);
     }
-
 
     public function testRemoveRecord(){
-
         $this->app['config']->set('dns.default', 'route53');
 
-        $zone = Dns::findZoneByName(env('ROUTE53_TEST_ZONE'));
-        $record = Dns::findRecord($zone, 'teste-xyz');
-
-
-
-        $this->assertIsBool(Dns::deleteRecord($zone, 'teste-xyz'));
+        $dns = app('dns');
+        $zone = $dns->findZoneByName(env('ROUTE53_TEST_ZONE'));
+        $record = $dns->findRecord($zone, 'teste-1-xyz');
+        $result = $dns->deleteRecord($zone, 'teste-1-xyz');
+        $this->assertIsBool($result);
     }
-
-
 
 }

@@ -14,7 +14,7 @@ Installation
 composer require dolalima/laravel-dns-facade
 ```
 
-## Publish the configuration file:
+## Publish the dns provider configuration file:
 ```bash
 php artisan vendor:publish --tag=config
 ```
