@@ -20,78 +20,90 @@ class CloudFlare implements DnsContract
 
     protected $adapter;
     protected $user;
+    protected $provider;
+    protected $config;
 
-    public function __construct($config)
+    public function __construct(string $provider, array $config)
     {
+        $this->provider = $provider;
+        $this->config = $config;
 
         $key = new APIToken($config['key']);
         $this->adapter = new Guzzle($key);
     }
 
-    public function listZones()
+    public function listZones(): array
     {
         $zones = new Zones($this->adapter);
         $response = $zones->listZones();
         $list = [];
         foreach ($response->result as $zone) {
-            $list[] = DnsZone::fromCloudFlare($zone);
+            $list[] = DnsZone::fromCloudFlare($zone, $this->provider);
         }
         return $list;
     }
 
-    public function findZoneByName(string $name)
+    public function findZoneByName(string $name): ?DnsZone
     {
         $zones = new Zones($this->adapter);
         $zoneID = $zones->getZoneID($name);
-        if(!$zoneID) {
+        if (!$zoneID) {
             return null;
         }
-        return DnsZone::fromCloudFlare($zones->getZoneById($zoneID)->result);
+        return DnsZone::fromCloudFlare($zones->getZoneById($zoneID)->result, $this->provider);
     }
 
-    public function getZoneById($id)
+    public function getZoneById($id): ?DnsZone
     {
         $zones = new Zones($this->adapter);
-        return DnsZone::fromCloudFlare($zones->getZoneById($id)->result);
+        return DnsZone::fromCloudFlare($zones->getZoneById($id)->result, $this->provider);
     }
 
 
-    public function listRecords($zone = null, $type = '', $name = '',$content='')
+    public function listRecords(DnsZone|string $zone = null, $type = '', $name = '', $content = ''): array
     {
+
+        if (is_string($zone)) {
+            $zone = $this->getZoneById($zone);
+        }
+
         $list = [];
         $dns = new DNS($this->adapter);
-        $records = $dns->listRecords($zone,$type ,$type,$content);
+        $records = $dns->listRecords($zone->id, $type, $type, $content);
         while (count($records->result) > 0) {
             foreach ($records->result as $record) {
 
-                $list[] = $this->convertRecord($record);
+                $list[] = $this->convertRecord($record, $zone);
             }
-            $records = $dns->listRecords($zone,$type ,$type,$content,$records->result_info->page + 1);
+            $records = $dns->listRecords($zone->id, $type, $type, $content, $records->result_info->page + 1);
         }
 
         return $list;
     }
 
-    public function findRecord($zone, $name='', $type='')
+    public function findRecord(DnsZone|string $zone, $name = '', $type = ''): ?DnsRecord
     {
-        $dns = new DNS($this->adapter);
+        $cloudflare = new DNS($this->adapter);
 
-        $zone = $this->getZoneById($zone);
+        if (is_string($zone)) {
+            $zone = $this->getZoneById($zone);
+        }
+
         $name = $name . '.' . $zone->name;
 
-        $records = $dns->listRecords($zone->id, $type, $name);
+        $records = $cloudflare->listRecords($zone->id, $type, $name);
 
         while (count($records->result) > 0) {
 
             foreach ($records as $record) {
 
                 $record = $record[0];
-                if($type && $record->type != $type) {
+                if ($type && $record->type != $type) {
                     continue;
                 }
 
-                if ($record->name == $name ){
-                    return DnsRecord::fromCloudFlare($record, $zone->name);
+                if ($record->name == $name) {
+                    return DnsRecord::fromCloudFlare($record, $zone);
                 }
             }
             $records = $records->next();
@@ -100,41 +112,53 @@ class CloudFlare implements DnsContract
         return null;
     }
 
-    public function createRecord($zone, $name, $type, $content, $ttl=300,$ssl_tunnel=false)
+    public function createRecord(DnsZone|string $zone, $name, $type, $content, $ttl = 300, $ssl_tunnel = false): DnsRecord
     {
 
+        if (is_string($zone)) {
+            $zone = $this->getZoneById($zone);
+        }
+
         $exists = $this->findRecord($zone, $name, $type);
-        if($exists) {
+        if ($exists) {
             throw new ExceptionDnsRecordAlreadyExist();
         }
 
-        $dns = new DNS($this->adapter);
+        $cloudflare = new DNS($this->adapter);
 
-        return $dns->addRecord($zone, $type, $name, $content, $ttl,$ssl_tunnel,$comment='created by Dns Manager');
+        return $cloudflare->addRecord($zone, $type, $name, $content, $ttl, $ssl_tunnel, $comment = 'created by Dns Manager');
     }
 
     public function updateRecord($zone, $name, $type, $content, $ttl)
     {
         $record = $this->findRecord($zone, $name);
-        if($record){
-            $dns = new DNS($this->adapter);
-            return $dns->updateRecord($zone, $record->id, $type, $name, $content, $ttl);
+        if ($record) {
+            $cloudflare = new DNS($this->adapter);
+            return $cloudflare->updateRecord($zone, $record->id, $type, $name, $content, $ttl);
         }
     }
 
-    public function deleteRecord($zone, $name)
+    public function deleteRecord(DnsZone|string $zone, string $name): bool
     {
-        $record = $this->findRecord($zone, $name);
-        if($record){
-            $dns = new DNS($this->adapter);
-            return $dns->deleteRecord($zone, $record->id);
+
+        if (is_string($zone)) {
+            $zone = $this->getZoneById($zone);
         }
+
+        $record = $this->findRecord($zone, $name);
+        if ($record) {
+            $cloudflare = new DNS($this->adapter);
+            return $cloudflare->deleteRecord($zone, $record->id);
+        }
+
+        return false;
 
     }
 
     public function getRecord($zone, $name, $type)
     {
-        // TODO: Implement getRecord() method.
+        $record = $this->findRecord($zone, $name, $type);
+
     }
 
 
@@ -142,9 +166,9 @@ class CloudFlare implements DnsContract
      * @param $record
      * @return DnsRecord
      */
-    public function convertRecord($record): DnsRecord
+    public function convertRecord($record, $zone): DnsRecord
     {
-        return DnsRecord::fromCloudFlare($record);
+        return DnsRecord::fromCloudFlare($record, $zone);
     }
 
 

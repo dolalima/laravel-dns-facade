@@ -103,21 +103,33 @@ class DnsManager implements FactoryContract
         $driverMethod = 'create'.ucfirst($name).'Driver';
 
         if (method_exists($this, $driverMethod)) {
-            return $this->{$driverMethod}($config);
+            return $this->{$driverMethod}($name,$config);
         } else {
             throw new \InvalidArgumentException("Driver [{$name}] is not supported.");
         }
 
     }
 
-    public function createRoute53Driver($config)
+    public function createRoute53Driver($name,$config)
     {
-        return new AwsRoute53($config);
+        return new AwsRoute53($name,$config);
     }
 
-    public function createCloudflareDriver($config)
+    public function createCloudflareDriver($name,$config)
     {
-        return new CloudFlare($config);
+        return new CloudFlare($name,$config);
+    }
+
+
+    public function purge($name = null)
+    {
+        $name = $name ?: $this->getDefaultDriver();
+
+        if (isset($this->providers[$name])) {
+            unset($this->providers[$name]);
+        }
+
+        return $this;
     }
 
     /**
